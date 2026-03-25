@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="Main_FSM" Id="{c43d7473-544d-4a51-9089-3cf1a0f943c6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Main_FSM
+
+VAR_INPUT
+	currentCmd:					E_Command 	:= E_Command.CMD_NONE;
+END_VAR
+
+
+VAR_OUTPUT
+	currentState: 				E_PodState  := E_PodState.STATE_BOOT;
+END_VAR
+
+VAR
+	criticalFault:				BOOL;
+	charging_in_progress:		BOOL;
+	discharging_in_progress:	BOOL;
+	
+	fb_handle_emergency:		FB_Handle_Emergency;
+	fb_discharge:				FB_Discharge;
+	fb_charge:					FB_Charge;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF currentCmd = E_Command.CMD_EMERGENCY OR (CheckCritical() AND currentState >= 4) THEN
+	currentState := E_PodState.STATE_EMERGENCY;
+	criticalFault := TRUE;
+	FB_Handle_Emergency();
+ELSIF currentState = E_PodState.STATE_MOVEMENT AND 
+    GVL_Prop.speed = 0 AND GVL_Prop.target_speed = 0 THEN
+		currentState := E_PodState.STATE_LEVITATION;
+ELSIF currentState = E_PodState.STATE_DEMO AND GVL_FSM.brakes_engaged THEN
+    currentState := E_PodState.STATE_EMERGENCY;
+ELSIF currentState = E_PodState.STATE_BOOT AND BasicChecks() THEN
+	currentState := E_PodState.STATE_SYNC;
+END_IF
+
+CASE currentState OF
+	E_PodState.STATE_EMERGENCY:
+		IF criticalFault THEN
+			FB_Handle_Emergency();
+		ELSIF currentCmd = E_Command.CMD_TO_MAINTENANCE THEN
+			GVL_FSM.engage_brakes := FALSE;
+			currentState := E_PodState.STATE_MAINTENANCE;
+		END_IF
+		
+	E_PodState.STATE_BOOT:  
+		IF BasicChecks() THEN
+			currentState := E_PodState.STATE_SYNC;
+		END_IF
+		
+	E_PodState.STATE_SYNC:
+		GVL_FSM.enable_heartbeat := TRUE;
+		IF GVL_FSM.heartbeat_OK AND currentCmd = E_Command.CMD_TO_IDLE THEN
+			currentState := E_PodState.STATE_IDLE;
+		END_IF
+		
+	E_PodState.STATE_IDLE:
+		// maybe basic checks again WC state - 8
+		GVL_FSM.enable_PT_checks := TRUE;
+		GVL_FSM.enable_temp_checks := TRUE;
+		GVL_FSM.enable_telemetry := TRUE;
+		
+		IF currentCmd = E_Command.CMD_TO_HV_ACTIVE THEN
+			FB_Charge();
+			IF GVL_PT.HVAL_STATUS = 1 AND GVL_PT.total_voltage >= 550 THEN
+				currentState := E_PodState.STATE_HV_ACTIVE;
+			END_IF
+		ELSIF currentCmd = E_Command.CMD_TO_MAINTENANCE THEN
+			GVL_FSM.engage_brakes := FALSE;
+			currentState := E_PodState.STATE_MAINTENANCE;
+		END_IF
+		
+	E_PodState.STATE_HV_ACTIVE:
+		GVL_FSM.enable_levi_checks := TRUE;
+		GVL_FSM.enable_prop_checks := TRUE;
+				
+		IF currentCmd = E_Command.CMD_TO_DEMO AND NOT CheckCritical() THEN
+			GVL_FSM.engage_brakes := FALSE;
+			currentState := E_PodState.STATE_DEMO;
+		ELSIF currentCmd = E_Command.CMD_TO_IDLE THEN
+			GVL_FSM.open_SDC := TRUE;
+			FB_Discharge();
+			IF GVL_PT.HVAL_STATUS = 0 AND GVL_Levi.drive_voltages = 0 AND GVL_Prop.drive_voltages = 0 THEN
+				currentState := E_PodState.STATE_IDLE;
+			END_IF
+		END_IF
+		
+	E_PodState.STATE_DEMO:
+		IF currentCmd = E_Command.CMD_TO_IDLE THEN
+			GVL_FSM.engage_brakes := TRUE;
+			GVL_FSM.open_SDC := TRUE;
+			FB_Discharge();
+			IF GVL_FSM.brakes_engaged AND GVL_PT.HVAL_STATUS = 0 THEN
+				currentState := E_PodState.STATE_IDLE;
+			END_IF
+		ELSIF currentCmd = E_Command.CMD_TO_LEVITATION THEN
+			GVL_Levi.levitation_active := TRUE;
+			currentState := E_PodState.STATE_LEVITATION;
+		END_IF
+		
+	E_PodState.STATE_LEVITATION:
+		IF currentCmd = E_Command.CMD_TO_DEMO THEN
+			GVL_Levi.levitation_active := FALSE;
+			currentState := E_PodState.STATE_DEMO;
+		ELSIF currentCmd = E_Command.CMD_TO_MOVEMENT THEN
+			currentState := E_PodState.STATE_MOVEMENT;
+			Handle_movement();
+		END_IF
+		
+	E_PodState.STATE_MOVEMENT:
+		Handle_movement();
+		
+	E_PodState.STATE_MAINTENANCE:
+		IF currentCmd = E_Command.CMD_TO_IDLE THEN
+			GVL_FSM.engage_brakes := TRUE;
+			IF GVL_FSM.brakes_engaged THEN
+				currentState := E_PodState.STATE_IDLE;
+			END_IF
+		END_IF
+		
+END_CASE]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

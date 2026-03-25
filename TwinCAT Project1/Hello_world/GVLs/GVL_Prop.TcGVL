@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="GVL_Prop" Id="{50abe306-50cd-40fe-9fcd-ded7060b0d4e}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	speed:					INT;
+	target_speed:			INT;
+	accelerating:			BOOL;
+	braking:				BOOL;
+	propulsion_fault: 		BOOL;
+	propulsion_enable: 		BOOL;
+	propulsion_active: 		BOOL;
+	drive_voltages: INT;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

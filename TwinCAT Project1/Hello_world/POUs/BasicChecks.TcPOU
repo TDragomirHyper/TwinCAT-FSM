@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="BasicChecks" Id="{bf1c1cc0-8eba-4f0b-a034-ca17c8939d6d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION BasicChecks : BOOL
+VAR_INPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[BasicChecks := 
+    GVL_FSM.ethercat_ready AND
+    GVL_FSM.safety_inputs_valid AND
+    GVL_FSM.can_bus_ok;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
