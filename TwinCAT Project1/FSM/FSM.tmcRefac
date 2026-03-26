@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Refactors>
+  <Renames>
+    <RenamedType>
+      <Type guid="c43d7473-544d-4a51-9089-3cf1a0f943c6">MAIN_FSM</Type>
+      <From>Main_FSM</From>
+      <To>FB_Main_FSM</To>
+    </RenamedType>
+  </Renames>
+</Refactors>

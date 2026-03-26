@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <POU Name="Main_FSM" Id="{c43d7473-544d-4a51-9089-3cf1a0f943c6}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK Main_FSM
+  <POU Name="FB_Main_FSM" Id="{c43d7473-544d-4a51-9089-3cf1a0f943c6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Main_FSM
 
 VAR_INPUT
 	currentCmd:					E_Command 	:= E_Command.CMD_NONE;

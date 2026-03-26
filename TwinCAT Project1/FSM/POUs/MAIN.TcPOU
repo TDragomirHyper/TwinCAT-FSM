@@ -3,10 +3,17 @@
   <POU Name="MAIN" Id="{ee0ed416-3c8e-41d0-b63e-3e0aab4b08ba}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-	main_fsm	: Main_FSM;
+	main_fsm	: FB_Main_FSM;
+	main_tests	: FB_Test_MainFSM;
+	
+	tests_on	: BOOL	:= TRUE;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[main_fsm();]]></ST>
+      <ST><![CDATA[IF tests_on THEN
+	TcUnit.RUN();
+ELSE
+	main_fsm();
+END_IF]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>
