@@ -7,6 +7,7 @@ VAR_INPUT
 END_VAR
 VAR_OUTPUT
     busy: 					BOOL;
+    done: 					BOOL;
 END_VAR
 VAR
     state: 					INT := 0;
@@ -18,14 +19,15 @@ END_VAR
       <ST><![CDATA[IF NOT execute THEN
     state := 0;
     busy := FALSE;
+    done := FALSE;
     tonDelay(IN := FALSE);
     RETURN;
 END_IF
 
+//trigger EL!
 busy := TRUE;
 CASE state OF
-    0:  GVL_FSM.trigger_EL := TRUE;
-		GVL_FSM.open_SDC := TRUE;
+    0:  GVL_FSM.open_SDC := TRUE;
         GVL_FSM.engage_brakes := TRUE;
         GVL_Prop.propulsion_enable := FALSE;
         GVL_Levi.levitation_active := FALSE;
@@ -44,9 +46,8 @@ CASE state OF
         
     2:	tonDelay(IN := TRUE, PT := T#200MS);
         IF tonDelay.Q THEN
-			GVL_FSM.trigger_EL := FALSE;
             busy := FALSE;
-			execute := FALSE;
+            done := TRUE;
         END_IF
 END_CASE]]></ST>
     </Implementation>

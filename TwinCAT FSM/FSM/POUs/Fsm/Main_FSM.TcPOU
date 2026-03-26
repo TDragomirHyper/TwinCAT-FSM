@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <POU Name="FB_Main_FSM" Id="{c43d7473-544d-4a51-9089-3cf1a0f943c6}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_Main_FSM
+  <POU Name="Main_FSM" Id="{c43d7473-544d-4a51-9089-3cf1a0f943c6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Main_FSM
 
 VAR_INPUT
 	currentCmd:					E_Command 	:= E_Command.CMD_NONE;
@@ -26,7 +26,7 @@ END_VAR
       <ST><![CDATA[IF currentCmd = E_Command.CMD_EMERGENCY OR (CheckCritical() AND currentState >= 4) THEN
 	currentState := E_PodState.STATE_EMERGENCY;
 	criticalFault := TRUE;
-	fb_handle_emergency(execute := TRUE);
+	FB_Handle_Emergency();
 ELSIF currentState = E_PodState.STATE_MOVEMENT AND 
     GVL_Prop.speed = 0 AND GVL_Prop.target_speed = 0 THEN
 		currentState := E_PodState.STATE_LEVITATION;
@@ -39,7 +39,7 @@ END_IF
 CASE currentState OF
 	E_PodState.STATE_EMERGENCY:
 		IF criticalFault THEN
-			fb_handle_emergency(busy => criticalFault);
+			FB_Handle_Emergency();
 		ELSIF currentCmd = E_Command.CMD_TO_MAINTENANCE THEN
 			GVL_FSM.engage_brakes := FALSE;
 			currentState := E_PodState.STATE_MAINTENANCE;

@@ -19,7 +19,6 @@ VAR_GLOBAL
 	open_SDC: 				BOOL	:= TRUE;
 	enable_telemetry: BOOL;
 	enable_PT_checks: BOOL;
-	trigger_EL: BOOL;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

@@ -7,7 +7,8 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[Boot_To_Sync();]]></ST>
+      <ST><![CDATA[Boot_To_Sync();
+Emergency_Command();]]></ST>
     </Implementation>
     <Method Name="Boot_To_Sync" Id="{90e1571a-c972-4c67-8c2c-de9b5672896b}">
       <Declaration><![CDATA[METHOD Boot_To_Sync : REFERENCE TO FB_Test
@@ -40,7 +41,27 @@ END_VAR
       <Implementation>
         <ST><![CDATA[TEST('Emergency_Command');
 
+main_fsm.currentState 	:= E_PodState.STATE_DEMO;
+main_fsm.currentCmd		:= E_Command.CMD_EMERGENCY;
 
+main_fsm();
+
+AssertEquals_INT(
+	Expected 	:= E_PodState.STATE_EMERGENCY,
+	Actual		:= main_fsm.currentState,
+	Message		:= 'FSM should transition Boot -> Sync'
+);
+
+AssertEquals_BOOL(
+	Expected 	:= TRUE,
+	Actual		:= main_fsm.criticalFault,
+	Message		:= 'FSM should signify the critical state'
+);
+
+AssertTrue(
+	main_fsm.fb_handle_emergency.busy,
+	Message 	:= 'Handle Emergency should be called'
+);
 
 TEST_FINISHED();]]></ST>
       </Implementation>
