@@ -41,7 +41,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[TEST('Emergency_Command');
 
-main_fsm.currentState 	:= E_PodState.STATE_DEMO;
+main_fsm.SetState(newState 	:= E_PodState.STATE_DEMO);
 main_fsm.currentCmd		:= E_Command.CMD_EMERGENCY;
 
 main_fsm();

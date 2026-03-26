@@ -9,10 +9,11 @@ END_VAR
 
 
 VAR_OUTPUT
-	currentState: 				E_PodState  := E_PodState.STATE_BOOT;
 END_VAR
 
 VAR
+	currentState: 				E_PodState  := E_PodState.STATE_BOOT;
+	
 	criticalFault:				BOOL;
 	charging_in_progress:		BOOL;
 	discharging_in_progress:	BOOL;
@@ -122,5 +123,15 @@ CASE currentState OF
 		
 END_CASE]]></ST>
     </Implementation>
+    <Method Name="SetState" Id="{ce851b79-228a-46cb-beb5-752507e7ca60}">
+      <Declaration><![CDATA[METHOD SetState
+VAR_INPUT
+	newState	: E_PodState;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[currentState := newState;]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>
