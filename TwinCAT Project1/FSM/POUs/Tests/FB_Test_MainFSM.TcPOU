@@ -2,15 +2,48 @@
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Test_MainFSM" Id="{d73df427-cc73-4c5c-8bd4-affee78edae7}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Test_MainFSM EXTENDS TcUnit.FB_TestSuite
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-END_VAR
 VAR
+	main_fsm : FB_Main_FSM;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[]]></ST>
+      <ST><![CDATA[Boot_To_Sync();]]></ST>
     </Implementation>
+    <Method Name="Boot_To_Sync" Id="{90e1571a-c972-4c67-8c2c-de9b5672896b}">
+      <Declaration><![CDATA[METHOD Boot_To_Sync : REFERENCE TO FB_Test
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[TEST('Boot_To_Sync');
+
+GVL_FSM.can_bus_ok			:= TRUE;
+GVL_FSM.safety_inputs_valid	:= TRUE;
+GVL_FSM.ethercat_ready		:= TRUE;
+
+main_fsm();
+
+AssertEquals_INT(
+	Expected 	:= E_PodState.STATE_SYNC,
+	Actual		:= main_fsm.currentState,
+	Message		:= 'FSM should transition Boot -> Sync'
+);
+
+TEST_FINISHED();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Emergency_Command" Id="{593991bd-eb70-44cf-ac1b-cdf507eb8587}">
+      <Declaration><![CDATA[METHOD Emergency_Command : REFERENCE TO FB_Test
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[TEST('Emergency_Command');
+
+
+
+TEST_FINISHED();]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>
